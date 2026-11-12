@@ -1,0 +1,32 @@
+# Git
+.git
+.gitignore
+.github
+
+# Virtual Environments & Build Artifacts
+.venv
+venv
+env
+*.egg-info
+build
+dist
+
+# Python Bytecode & Caches
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache
+.coverage
+htmlcov
+
+# Environment & Secrets (Loaded dynamically or via container env)
+.env
+.staging.env
+*.env.local
+
+# IDE & Editor files
+.vscode
+.idea
+.antigravity
+*.swp

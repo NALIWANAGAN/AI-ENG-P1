@@ -1,0 +1,28 @@
+services:
+  # Postgres DB service
+  db:
+    image: postgres:16-alpine
+    container_name: data_extractor_db_container
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      # Persistent volume for data storage
+      - postgres_data:/var/lib/postgresql/data
+
+      # Bind-mount your schema file as Read-Only (:ro)
+      - ./migration/01_create_invoice_vendor_line_item.sql:/docker-entrypoint-initdb.d/01_create_invoice_vendor_line_item.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  postgres_data:
+    
