@@ -337,6 +337,35 @@ wheels = [
 ]
 
 [[package]]
+name = "data-extractor"
+version = "0.1.0"
+source = { editable = "." }
+dependencies = [
+    { name = "fastmcp" },
+    { name = "psycopg", extra = ["binary"] },
+    { name = "pydantic" },
+    { name = "pypdf" },
+    { name = "sqlglot" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "pytest" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "fastmcp", specifier = ">=4.1.7" },
+    { name = "psycopg", extras = ["binary"], specifier = ">=3.3.8" },
+    { name = "pydantic", specifier = ">=2.0" },
+    { name = "pypdf", specifier = ">=7.0.0" },
+    { name = "sqlglot", specifier = ">=30.30.0" },
+]
+
+[package.metadata.requires-dev]
+dev = [{ name = "pytest", specifier = ">=9.2.0" }]
+
+[[package]]
 name = "dnspython"
 version = "2.9.2"
 source = { registry = "https://pypi.org/simple" }
@@ -667,35 +696,6 @@ sdist = { url = "https://files.pythonhosted.org/packages/19/14/cf3a6b6448849656e
 wheels = [
     { url = "https://files.pythonhosted.org/packages/a9/2d/610db864d7513158cebb8f36cc88e67e73bd6c7aa1905ef18d89e1281c81/opentelemetry_api-1.45.2-py3-none-any.whl", hash = "sha256:2cbd737377e710ee740d261c94e93fa0f08e6d037c18f17513cc0a2d94479a34", size = 60335, upload-time = "2026-10-29T17:29:06.955Z" },
 ]
-
-[[package]]
-name = "Data Extractor"
-version = "0.1.0"
-source = { virtual = "." }
-dependencies = [
-    { name = "fastmcp" },
-    { name = "psycopg", extra = ["binary"] },
-    { name = "pydantic" },
-    { name = "pypdf" },
-    { name = "sqlglot" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "pytest" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "fastmcp", specifier = ">=4.1.7" },
-    { name = "psycopg", extras = ["binary"], specifier = ">=3.3.8" },
-    { name = "pydantic", specifier = ">=2.0" },
-    { name = "pypdf", specifier = ">=7.0.0" },
-    { name = "sqlglot", specifier = ">=30.30.0" },
-]
-
-[package.metadata.requires-dev]
-dev = [{ name = "pytest", specifier = ">=9.2.0" }]
 
 [[package]]
 name = "packaging"
