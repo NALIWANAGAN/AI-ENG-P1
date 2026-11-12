@@ -1,0 +1,32 @@
+{
+  "$schema": "https://benjibenji20.dev/schemas/portfolio.v1.json",
+  "track": true,
+  "requireHumanApproval": true,
+  "mediaPreferences": {
+    "captureScreenshots": false,
+    "generateArchitectureDiagrams": true
+  },
+  "generateArticle": false,
+  "context": "This project: AI Engineering Stuffs consists of subprojects made to accomplished my AI Engineering learning roadmap. I prefer you to create an Article for each subproject under the project's slug (ai-engineering-stuffs) rather than creating a separate project entry.",
+  "commands": {
+    "description": "Listed all the commit keywords before the actual commit message. E.g: '(feat): message' this means a new feature.",
+    "commitKeys":{
+      "feat": "New feature(s). High chance to create an article BUT still analyze the code changes if worthy to create an article or just work log.",
+      "ref": "Refactor(s). High change to create a work log BUT still analyze the code changes if worthy to create a work log.",
+      "fix": "Fix. Low chance or high chance to ignore BUT still analyze the code changes if worthy to create a work log.",
+      "others **": "Assumpt the commit key. BUT still analyze the code changes if worthy for anything."
+    }
+  },
+  "primaryBranch": "main",
+  "projectTitle": "AI Engineering Stuffs",
+  "projectSlug": "ai-engineering-stuffs",
+  "category": "AI Engineering",
+  "ignoreDirectory": [
+    "tests/fixtures",
+    "docs/legacy",
+    "dist"
+  ],
+  "subProjectOverview": "A learning phase Portfolio Project 1: Self-Correcting Data Extractor & MCP Server. This automates data extraction to the documents powered by AI while maintaining a safe data manipulation to.",
+  "targetAudience": "AI Engineer, Recruiter, Opensource community, Learner, and Employer",
+  "writingTone": "Deep-dive engineering with concise code snippets but make it sounds like you are talking to a beginner."
+}
