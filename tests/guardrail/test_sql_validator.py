@@ -1,6 +1,6 @@
 import pytest
 
-from mcp_server.sql_validator import sql_validator
+from guardrail.sql_validator import sql_validator
 
 ALLOWED_REASON = "This SQL query is allowed."
 

@@ -21,7 +21,11 @@ dev = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/mcp_server"]
+packages = [
+    "src/mcp_server", "src/guardrail",
+    "src/tools", "src/client",
+    "scr/schema"
+]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
