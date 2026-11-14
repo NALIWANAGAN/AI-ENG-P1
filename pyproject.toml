@@ -8,6 +8,7 @@ version = "0.1.0"
 requires-python = ">=3.11"
 dependencies = [
     "fastmcp>=4.1.7",
+    "httpx>=0.28.1",
     "openai>=3.50.0",
     "psycopg[binary]>=3.3.8",
     "pydantic>=2.0",
@@ -23,10 +24,14 @@ dev = [
 [tool.hatch.build.targets.wheel]
 packages = [
     "src/mcp_server", "src/guardrail",
-    "src/extractor", "src/client",
+    "src/extractor", "src/clients",
     "scr/schema", "src/tools"
 ]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
+markers = [
+    "integration: tests that require a running PostgreSQL container",
+    "integration: tests requiring live external services",
+]
