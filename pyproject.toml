@@ -23,8 +23,8 @@ dev = [
 [tool.hatch.build.targets.wheel]
 packages = [
     "src/mcp_server", "src/guardrail",
-    "src/tools", "src/client",
-    "scr/schema"
+    "src/extractor", "src/client",
+    "scr/schema", "src/tools"
 ]
 
 [tool.pytest.ini_options]
