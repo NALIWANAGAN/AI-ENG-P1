@@ -1,6 +1,6 @@
 from typing import Any
 from pydantic import BaseModel, Field
-from client.postgres_client import PostgresClient, db_client
+from client.postgres_client import PostgresClient
 
 # define not allowed tables
 ALLOWED_TABLES = {
