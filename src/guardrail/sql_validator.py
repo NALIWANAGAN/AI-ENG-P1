@@ -19,7 +19,7 @@ FORBIDDEN_ANYWHERE = (
 
 class SQLValidatorResult(BaseModel):
     allowed: bool = False
-    reason: str # human/LLM-readable; this goes back to the model when rejected
+    notice: str # human/LLM-readable; this goes back to the model when rejected
     normalized_sql: str | None = None
 
 class ModelSQLValidator:
@@ -28,8 +28,8 @@ class ModelSQLValidator:
         self.dialect = dialect or os.getenv("SQLGLOT_DB_DIALECT", "postgres")
         
     @staticmethod
-    def _reject(reason: str) -> SQLValidatorResult:
-        return SQLValidatorResult(allowed=False, reason=reason)
+    def _reject(notice: str) -> SQLValidatorResult:
+        return SQLValidatorResult(allowed=False, notice=notice)
         
     def check_sql(self, raw_model_query: str | None = None) -> SQLValidatorResult:
         """Allow only single INSERT/UPDATE/SELECT statements. Reject everything else."""
@@ -63,7 +63,7 @@ class ModelSQLValidator:
         if bad is not None:
             return self._reject(f"{type(bad).__name__.upper()} operations are not allowed.")
         
-        # step 6: apply the "no hidden INSERT/UPDATE" rule to everything that isn't itself an INSERT/UPDATE
+        # apply the "no hidden INSERT/UPDATE" rule to everything that isn't itself an INSERT/UPDATE
         if not isinstance(node, (exp.Insert, exp.Update)) and node.find(exp.Insert, exp.Update):
             return self._reject("SELECT must not contain INSERT or UPDATE.")
 
@@ -74,7 +74,7 @@ class ModelSQLValidator:
             
         return SQLValidatorResult(
             allowed=True, 
-            reason="This SQL query is allowed.",
+            notice="This SQL query is allowed.",
             normalized_sql=node.sql(dialect=self.dialect)
         )
 

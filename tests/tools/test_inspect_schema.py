@@ -76,7 +76,7 @@ def test_all_disallowed_tables_exits_early_without_db_call(mock_pg_client):
     assert result.success is False
     assert result.table_information is None
     assert result.not_allowed_tables == ["users", "pg_shadow"]
-    assert "Unknown or disallowed table(s)" in result.message
+    assert "Unknown or disallowed table(s)" in result.notice
     # Must never open a cursor or hit Postgres
     mock_conn.cursor.assert_not_called()
 
@@ -106,8 +106,8 @@ def test_mixed_valid_and_disallowed_tables(mock_pg_client):
     assert result.success is True
     assert list(result.table_information.keys()) == ["vendors"]
     assert result.not_allowed_tables == ["secret_audit_log"]
-    assert "Do not use this table for next attempt" in result.message
-    assert "secret_audit_log" in result.message
+    assert "Do not use this table for next attempt" in result.notice
+    assert "secret_audit_log" in result.notice
 
 
 def test_sql_injection_table_name_blocked_by_allowlist(mock_pg_client):

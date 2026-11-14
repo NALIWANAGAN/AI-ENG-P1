@@ -2,7 +2,7 @@ import pytest
 
 from guardrail.sql_validator import sql_validator
 
-ALLOWED_REASON = "This SQL query is allowed."
+ALLOWED_NOTICE = "This SQL query is allowed."
 
 
 # ---------------------------------------------------------------- allowed ---
@@ -53,13 +53,13 @@ ALLOWED_REASON = "This SQL query is allowed."
 )
 def test_allowed(sql):
     r = sql_validator.check_sql(sql)
-    assert r.allowed, r.reason
-    assert r.reason == ALLOWED_REASON
+    assert r.allowed, r.notice
+    assert r.notice == ALLOWED_NOTICE
     assert r.normalized_sql  # allowed queries always come back with normalized SQL
 
 
 # --------------------------------------------------------------- rejected ---
-# (sql, text that must appear in the reason the LLM will read)
+# (sql, text that must appear in the notice the LLM will read)
 REJECTED = [
     # DDL
     ("DROP TABLE invoices", "Only INSERT, UPDATE and SELECT"),
@@ -114,11 +114,11 @@ REJECTED = [
 ]
 
 
-@pytest.mark.parametrize("sql, reason_part", REJECTED)
-def test_rejected(sql, reason_part):
+@pytest.mark.parametrize("sql, notice_part", REJECTED)
+def test_rejected(sql, notice_part):
     r = sql_validator.check_sql(sql)
     assert not r.allowed
-    assert reason_part in r.reason, f"unexpected reason: {r.reason}"
+    assert notice_part in r.notice, f"unexpected notice: {r.notice}"
     assert r.normalized_sql is None  # nothing runnable is ever returned for a rejected query
 
 

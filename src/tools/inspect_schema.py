@@ -46,7 +46,7 @@ order by con.contype, con.conname;
 
 class TableInformation(BaseModel):
     success: bool = False
-    message: str = Field(..., description="Schema response message")
+    notice: str = Field(..., description="Schema response notice")
     not_allowed_tables: list[str] | None = Field(
         default=None,
         description="Not allowed tables might accidentally passed to the tool."
@@ -81,7 +81,7 @@ class InspectSchema:
                 else:
                     not_allowed_tables.append(t)
 
-        not_allowed_table_message = (
+        not_allowed_table_notice = (
             f"Unknown or disallowed table(s): {sorted(not_allowed_tables)}. "
             f"Allowed tables: {sorted(ALLOWED_TABLES)}."
             if not_allowed_tables
@@ -93,7 +93,7 @@ class InspectSchema:
             return TableInformation(
                 success=False,
                 not_allowed_tables=not_allowed_tables or None,
-                message=f"Error while trying to extract table information. {not_allowed_table_message}".strip(),
+                notice=f"Error while trying to extract table information. {not_allowed_table_notice}".strip(),
                 table_information=None,
             )
 
@@ -114,15 +114,15 @@ class InspectSchema:
                 }
 
         extra_warning = (
-            f" Do not use this table for next attempt: {not_allowed_table_message}"
-            if not_allowed_table_message
+            f" Do not use this table for next attempt: {not_allowed_table_notice}"
+            if not_allowed_table_notice
             else ""
         )
 
         return TableInformation(
             success=True,
             not_allowed_tables=not_allowed_tables or None,
-            message=f"These are the table definitions. Use this info to send a proper query.{extra_warning}",
+            notice=f"These are the table definitions. Use this info to send a proper query.{extra_warning}",
             table_information=table_information,
         )
     
