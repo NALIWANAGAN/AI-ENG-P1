@@ -8,7 +8,7 @@ create role encoder login password :'encoder_pw' in role app_write_role;
 grant usage on schema public to app_write_role;
 
 -- Explicitly ensure the role cannot create new tables/objects
-revoke create on schema public to app_write_role;
+revoke create on schema public from app_write_role;
 
 -- Grant read, insert, and update permissions on a specific table
 grant select,
