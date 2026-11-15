@@ -5,14 +5,23 @@ import uuid
 import psycopg
 import pytest
 
-# Update the import path below to match the module where execute_model_query lives
-from tools.execute_query import (
+from guardrail.sql_validator import ModelSQLValidator
+from repositories.query_repo import QueryRepository
+from services.query_service import (
     MAX_ROWS,
     ModelQueryResponse,
+    QueryService,
     _describe,
     _is_retryable,
-    execute_model_query,
 )
+
+
+def execute_model_query(client, query: str | None) -> ModelQueryResponse:
+    service = QueryService(
+        repo=QueryRepository(client.get_connection()),
+        validator=ModelSQLValidator(),
+    )
+    return service.execute_model_query(query)
 
 ALLOWED_QUERIES = [
     # SELECT basics
