@@ -1,0 +1,106 @@
+name: Automated Pytest Test Suite (CI)
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Run Pytest Test Suite
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    # Throwaway database that exists only for this job
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: 'postgres'
+          POSTGRES_PASSWORD: '12345'
+          POSTGRES_DB: 'ci_db'
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d ci_db"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      POSTGRES_URL: 'postgresql://postgres:12345@localhost:5432/ci_db'
+      POSTGRES_TEST_URL: 'postgresql://postgres:12345@localhost:5432/ci_db'
+      SQLGLOT_DB_DIALECT: 'postgres'
+      OLLAMA_PROVIDER_URL: ${{ secrets.OLLAMA_PROVIDER_URL || 'https://ollama.com/v1' }}
+      OLLAMA_API_KEY: ${{ secrets.OLLAMA_API_KEY }}
+      OLLAMA_MODEL_NAME: ${{ secrets.OLLAMA_MODEL_NAME || 'gpt-oss:20b' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install uv and Python 3.11
+        uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.11"
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --locked --all-groups
+
+      - name: Apply database migrations
+        run: |
+          for f in migration/[0-9][0-9]_*.sql; do
+            echo "Migrating $f"
+            psql "$POSTGRES_URL" -v ON_ERROR_STOP=1 -v encoder_pw=12345 -f "$f"
+          done
+
+      - name: Run pytest
+        run: uv run pytest -v
+
+  docker-compose:
+    name: Verify Docker Compose Stack
+    runs-on: ubuntu-latest
+    needs: test
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create .env with throwaway CI values
+        run: |
+          {
+            echo "DB_USER=postgres"
+            echo "DB_PASSWORD=12345"
+            echo "DB_NAME=ci_db"
+            echo "ENCODER_PASSWORD=12345"
+          } > .env
+
+      - name: Validate compose file
+        run: docker compose config --quiet
+
+      - name: Build images
+        run: docker compose build
+
+      - name: Start stack and wait until healthy
+        run: docker compose up -d --wait
+
+      - name: Verify the schema was created from a cold start
+        run: |
+          count=$(docker compose exec -T db psql -U postgres -d ci_db -tAc \
+            "select count(*) from information_schema.tables where table_schema = 'public' and table_name in ('vendors','invoices','line_items')")
+          echo "tables found: $count"
+          test "$count" = "3"
+
+      - name: Show container logs on failure
+        if: failure()
+        run: docker compose logs
+
+      - name: Tear down
+        if: always()
+        run: docker compose down -v
