@@ -32,25 +32,26 @@ def mock_pg_client(monkeypatch):
 @pytest.fixture
 def live_pg_client(monkeypatch):
     """Integration test fixture: connects to real Postgres and rolls back all changes."""
+    test_url = os.getenv("POSTGRES_TEST_URL")
+    assert test_url, "POSTGRES_TEST_URL must be set in .env to run integration tests"
+
     PostgresClient._instance = None
     PostgresClient._conn = None
+    monkeypatch.setenv("POSTGRES_URL", test_url)
 
     client = PostgresClient()
-    client.dbc = os.getenv("POSTGRES_TEST_URL")
     conn = client.get_connection()
     conn.autocommit = False
 
-    # Prevent any code under test from committing permanently mid-test
-    monkeypatch.setattr(conn, "commit", lambda: None)
+    # Starts the outer transaction so inner `conn.transaction()` calls become SAVEPOINTs
+    # and everything rolls back unconditionally when the test finishes.
+    with conn.transaction(force_rollback=True):
+        yield client
 
-    yield client
-
-    conn.rollback()
     conn.close()
     PostgresClient._instance = None
     PostgresClient._conn = None
     
-
 
 @pytest.fixture
 def mock_openai_client(monkeypatch):
