@@ -38,6 +38,11 @@ ALLOWED_NOTICE = "This SQL query is allowed."
         "INSERT INTO vendors (name) VALUES ('a') RETURNING id",
         "INSERT INTO vendors (id, name) VALUES ('d9621261-3d73-4c6a-9631-1504b1db8c96', 'a') "
         "ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name",                      # upsert, no WHERE needed
+        "WITH v AS (INSERT INTO vendors (name) VALUES ('Acme') RETURNING id), "
+        "i AS (INSERT INTO invoices (vendor_id, invoice_number, issue_date, due_date, currency, subtotal, tax, total) "
+        "SELECT v.id, 'INV-1', '2026-01-01', '2026-01-31', 'USD', 100.00, 10.00, 110.00 FROM v RETURNING id) "
+        "INSERT INTO line_items (invoice_id, description, quantity, unit_price, line_total) "
+        "SELECT i.id, 'Widget', 1.0, 100.00, 100.00 FROM i",                        # 3-table CTE INSERT in 1 query
         # UPDATE with WHERE
         "UPDATE invoices SET total = 110 WHERE id = 'd9621261-3d73-4c6a-9631-1504b1db8c96'",
         "UPDATE invoices SET total = 1 WHERE vendor_id IN (SELECT id FROM vendors WHERE name = 'Acme')",

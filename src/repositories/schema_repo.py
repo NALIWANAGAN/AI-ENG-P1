@@ -1,5 +1,3 @@
-from typing import Any
-
 import psycopg
 from fastmcp.dependencies import Depends
 
@@ -45,7 +43,7 @@ class SchemaRepository:
     def __init__(self, conn: psycopg.Connection = Depends(get_db_connection)):
         self._conn = conn
 
-    def fetch_table_schema(self, table: str) -> dict[str, Any]:
+    def fetch_table_schema(self, table: str) -> dict[str, list[dict[str, object]]]:
         with self._conn.cursor() as cur:
             cur.execute(COLUMNS_SQL, (table,))
             columns = cur.fetchall()

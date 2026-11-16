@@ -1,5 +1,3 @@
-from typing import Any
-
 from fastmcp.dependencies import Depends
 from pydantic import BaseModel, Field
 
@@ -67,7 +65,7 @@ class SchemaService:
                 table_information=None,
             )
 
-        table_information: dict[str, Any] = {}
+        table_information: dict[str, dict[str, list[dict[str, object]]]] = {}
         for table in sorted(requested):
             table_information[table] = self._repo.fetch_table_schema(table)
 

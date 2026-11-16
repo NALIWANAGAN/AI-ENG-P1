@@ -1,5 +1,3 @@
-from typing import Any
-
 import psycopg
 from fastmcp.dependencies import Depends
 from psycopg.rows import dict_row
@@ -15,7 +13,7 @@ class QueryRepository:
         self,
         normalized_sql: str,
         max_rows: int,
-    ) -> tuple[list[dict[str, Any]] | None, int, bool]:
+    ) -> tuple[list[dict[str, object]] | None, int, bool]:
         with self._conn.transaction(), self._conn.cursor(row_factory=dict_row) as cur:
             cur.execute(normalized_sql)  # run what sqlglot parsed, not the raw string
 

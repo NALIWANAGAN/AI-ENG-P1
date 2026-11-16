@@ -49,27 +49,29 @@ class ExtractedDocument(BaseModel):
 
 
 class ExtractInvoice:
-    def __init__(self, file_path: str):
-        path = Path(file_path)
-        if not path.is_file():
-            logger.error("File not found: %s", path)
-            raise FileNotFoundError(path)
-
-        ext = path.suffix.lower()
-        if ext not in SUPPORTED_TYPES:
-            raise UnsupportedFileTypeError(f"Cannot extract file type: {ext!r}")
-
-        self.path = path
-        self.file_type = ext
-
-    def extract_invoice(self) -> ExtractedDocument:
+    def extract_invoice(self, file_path: str) -> ExtractedDocument:
         """File type orchestrator: one extractor per supported type."""
-        if self.file_type == ".pdf":
-            return self._extract_pdf_invoice()
-        raise UnsupportedFileTypeError(f"Cannot extract file type: {self.file_type!r}")
+        # resolve and check path
+        path, file_type = self._path_resolver(file_path)
+        
+        if file_type == ".pdf":
+            return self._extract_pdf_invoice(path)
+        raise UnsupportedFileTypeError(f"Cannot extract file type: {file_type!r}")
+    
+    def _path_resolver(self, file_path: str) -> tuple[Path, str]:
+            path = Path(file_path)
+            if not path.is_file():
+                logger.error("File not found: %s", path)
+                raise FileNotFoundError(path)
+    
+            ext = path.suffix.lower()
+            if ext not in SUPPORTED_TYPES:
+                raise UnsupportedFileTypeError(f"Cannot extract file type: {ext!r}")
+    
+            return path, ext
 
-    def _extract_pdf_invoice(self) -> ExtractedDocument:
-        reader = PdfReader(self.path)
+    def _extract_pdf_invoice(self, path: Path) -> ExtractedDocument:
+        reader = PdfReader(path)
         if reader.is_encrypted:
             raise ValueError("Encrypted PDFs are not supported.")
 
@@ -86,18 +88,18 @@ class ExtractInvoice:
 
         # page markers are always present, so check the text itself
         if not any(p.split("\n", 1)[-1].strip() for p in pages_text):
-            raise NoTextLayerError(f"{self.path.name}: no extractable text (scanned PDF?)")
+            raise NoTextLayerError(f"{path.name}: no extractable text (scanned PDF?)")
 
-        return ExtractedDocument(raw_text=raw_text, metadata=self._file_metadata(reader))
+        return ExtractedDocument(raw_text=raw_text, metadata=self._file_metadata(reader, path))
 
-    def _file_metadata(self, reader: PdfReader) -> FileMetadata:
+    def _file_metadata(self, reader: PdfReader, path: Path) -> FileMetadata:
         """Both OS file-system metadata and internal PDF document properties."""
         meta = reader.metadata  # may be None if the PDF has no Info dictionary
-        stat = self.path.stat()
+        stat = path.stat()
 
         return FileMetadata(
-            file_name=self.path.name,
-            file_path=str(self.path),
+            file_name=path.name,
+            file_path=str(path),
             created_at_utc=datetime.fromtimestamp(stat.st_ctime, tz=timezone.utc),
             modified_at_utc=datetime.fromtimestamp(stat.st_mtime, tz=timezone.utc),
             page_count=len(reader.pages),
